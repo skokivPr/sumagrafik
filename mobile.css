@@ -12,23 +12,6 @@
    ============================================ */
 @media (max-width: 768px) {
 
-    /* === VISUAL INDICATOR - Mobile mode active === */
-    body::after {
-        content: "📱 MOBILE MODE | Width: "attr(data-width) " | CSS Active ✓";
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        background: #ff7300;
-        color: white;
-        text-align: center;
-        padding: 0.5rem;
-        font-size: 0.75rem;
-        font-weight: bold;
-        z-index: 99999;
-        pointer-events: none;
-        box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.3);
-    }
 
     /* Force mobile styles in iframe */
     html {
