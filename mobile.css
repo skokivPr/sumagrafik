@@ -1,0 +1,1133 @@
+/* ============================================
+   MOBILE STYLES - ULTRA COMPACT VERSION
+   ============================================ */
+
+/* Hide mobile tabs by default (desktop) */
+.mobile-tabs {
+    display: none;
+}
+
+/* ============================================
+   MOBILE MODE (≤768px) - EVERYTHING SMALLER
+   ============================================ */
+@media (max-width: 768px) {
+
+    /* === VISUAL INDICATOR - Mobile mode active === */
+    body::after {
+        content: "📱 MOBILE MODE | Width: "attr(data-width) " | CSS Active ✓";
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: #ff7300;
+        color: white;
+        text-align: center;
+        padding: 0.5rem;
+        font-size: 0.75rem;
+        font-weight: bold;
+        z-index: 99999;
+        pointer-events: none;
+        box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Force mobile styles in iframe */
+    html {
+        font-size: 16px !important;
+    }
+
+    /* === BASE CONTAINER === */
+    .container {
+        padding: 0.25rem !important;
+    }
+
+    /* === MOBILE TABS === */
+    .mobile-tabs {
+        display: flex !important;
+        gap: 0.25rem;
+        margin-bottom: 0.5rem;
+        padding: 0.15rem;
+        background: var(--panel-bg);
+        border: 1px solid var(--border-color);
+    }
+
+    .mobile-tab {
+        flex: 1;
+        padding: 0.4rem 0.5rem;
+        background: transparent;
+        border: none;
+        color: var(--text-color);
+        font-size: 0.75rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .mobile-tab.active {
+        background: var(--highlight-color) !important;
+        color: white !important;
+    }
+
+    /* === LAYOUT === */
+    .main-grid {
+        display: block !important;
+    }
+
+    .left-column,
+    .right-column {
+        display: none !important;
+        width: 100%;
+    }
+
+    .left-column.mobile-active,
+    .right-column.mobile-active {
+        display: block !important;
+        max-height: calc(100vh - 140px);
+        overflow-y: auto;
+    }
+
+    /* === HEADER === */
+    .header {
+        margin-bottom: 0.5rem !important;
+    }
+
+    .header h1 {
+        font-size: 1rem !important;
+        margin-bottom: 0.25rem !important;
+    }
+
+    .header .subtitle {
+        font-size: 0.7rem !important;
+    }
+
+    /* === THEME SWITCHER === */
+    .theme-switcher {
+        padding: 0.4rem 0.6rem !important;
+        font-size: 0.7rem !important;
+        gap: 0.3rem !important;
+    }
+
+    /* === DAY SELECTOR === */
+    .day-selector-wrapper {
+        margin-bottom: 0.5rem !important;
+        position: relative !important;
+    }
+
+    .day-selector-wrapper label {
+        display: none !important;
+    }
+
+    .day-selector-left {
+        gap: 0.3rem !important;
+        flex: 1 !important;
+        min-width: 0 !important;
+    }
+
+    #day-value {
+        font-size: 1.1rem !important;
+        min-width: 2.5rem !important;
+        height: 2rem !important;
+        padding: 0 0.5rem !important;
+        cursor: pointer !important;
+        font-weight: 700 !important;
+    }
+
+    .current-day-info {
+        font-size: 0.65rem !important;
+        padding: 0 0.4rem !important;
+        height: 2rem !important;
+        flex-shrink: 0 !important;
+    }
+
+    /* Mobile day selector controls */
+    .mobile-day-controls {
+        display: flex !important;
+        align-items: center;
+        gap: 0.3rem;
+        margin-bottom: 0.3rem;
+    }
+
+    .mobile-day-btn {
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+        width: 2.5rem;
+        height: 2.5rem;
+        background: var(--card-bg);
+        border: 2px solid var(--highlight-color);
+        color: var(--highlight-color);
+        font-size: 1.2rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        flex-shrink: 0;
+    }
+
+    .mobile-day-btn:active {
+        background: var(--highlight-color);
+        color: white;
+        transform: scale(0.95);
+    }
+
+    .mobile-day-display {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: var(--card-bg);
+        border: 2px solid var(--highlight-color);
+        padding: 0.3rem;
+        min-height: 2.5rem;
+    }
+
+    .mobile-day-number {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--highlight-color);
+        line-height: 1;
+    }
+
+    .mobile-day-date {
+        font-size: 0.6rem;
+        color: var(--text-color);
+        opacity: 0.7;
+        margin-top: 0.1rem;
+        line-height: 1;
+    }
+
+    .day-selector-wrapper input[type="range"] {
+        height: 12px !important;
+        margin-top: 0.4rem !important;
+        margin-bottom: 0.4rem !important;
+        border-radius: 0 !important;
+        background: linear-gradient(to right,
+                var(--highlight-color) 0%,
+                var(--highlight-color) var(--range-progress, 0%),
+                var(--border-color) var(--range-progress, 0%),
+                var(--border-color) 100%) !important;
+        padding: 0.5rem 0 !important;
+        cursor: grab !important;
+        touch-action: none !important;
+        -webkit-tap-highlight-color: transparent !important;
+    }
+
+    .day-selector-wrapper input[type="range"]:active {
+        cursor: grabbing !important;
+    }
+
+    .day-markers {
+        display: none !important;
+    }
+
+    .day-marker {
+        font-size: 0.45rem !important;
+    }
+
+    .day-selector-wrapper input[type="range"]::-webkit-slider-thumb {
+        -webkit-appearance: none !important;
+        appearance: none !important;
+        width: 32px !important;
+        height: 32px !important;
+        border-radius: 0 !important;
+        background: var(--highlight-color) !important;
+        border: 3px solid white !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 115, 0, 0.3) !important;
+        cursor: grab !important;
+        transition: transform 0.15s ease, box-shadow 0.15s ease !important;
+        position: relative;
+        top: -9px;
+    }
+
+    .day-selector-wrapper input[type="range"]:active::-webkit-slider-thumb {
+        transform: scale(1.2) !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), 0 0 0 2px rgba(255, 115, 0, 0.5) !important;
+        cursor: grabbing !important;
+    }
+
+    .day-selector-wrapper input[type="range"]::-moz-range-thumb {
+        width: 32px !important;
+        height: 32px !important;
+        border-radius: 0 !important;
+        background: var(--highlight-color) !important;
+        border: 3px solid white !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 115, 0, 0.3) !important;
+        cursor: grab !important;
+        transition: transform 0.15s ease, box-shadow 0.15s ease !important;
+    }
+
+    .day-selector-wrapper input[type="range"]:active::-moz-range-thumb {
+        transform: scale(1.2) !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), 0 0 0 2px rgba(255, 115, 0, 0.5) !important;
+        cursor: grabbing !important;
+    }
+
+    /* Track styles for better visibility */
+    .day-selector-wrapper input[type="range"]::-webkit-slider-runnable-track {
+        height: 12px !important;
+        border-radius: 0 !important;
+        background: transparent !important;
+    }
+
+    .day-selector-wrapper input[type="range"]::-moz-range-track {
+        height: 12px !important;
+        border-radius: 0 !important;
+        background: var(--border-color) !important;
+    }
+
+    .day-selector-wrapper input[type="range"]::-moz-range-progress {
+        height: 12px !important;
+        border-radius: 0 !important;
+        background: var(--highlight-color) !important;
+    }
+
+    /* Dark mode adjustments for slider thumb */
+    :root[theme="dark"] .day-selector-wrapper input[type="range"]::-webkit-slider-thumb {
+        border-color: rgba(25, 25, 25, 0.9) !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 115, 0, 0.5) !important;
+    }
+
+    :root[theme="dark"] .day-selector-wrapper input[type="range"]:active::-webkit-slider-thumb {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6), 0 0 0 2px rgba(255, 115, 0, 0.7) !important;
+    }
+
+    :root[theme="dark"] .day-selector-wrapper input[type="range"]::-moz-range-thumb {
+        border-color: rgba(25, 25, 25, 0.9) !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 115, 0, 0.5) !important;
+    }
+
+    :root[theme="dark"] .day-selector-wrapper input[type="range"]:active::-moz-range-thumb {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6), 0 0 0 2px rgba(255, 115, 0, 0.7) !important;
+    }
+
+    /* === CHARTS === */
+    .chart-container {
+        height: auto !important;
+        min-height: auto !important;
+        margin: 0.3rem 0 !important;
+    }
+
+    /* === MOBILE CHART NUMBERS === */
+    .mobile-chart-numbers {
+        width: 100%;
+        padding: 0.3rem 0;
+    }
+
+    .mobile-chart-title {
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-align: center;
+        margin-bottom: 0.3rem;
+        color: var(--text-color);
+    }
+
+    .mobile-chart-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.25rem;
+    }
+
+    .mobile-chart-item {
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 0;
+        padding: 0.25rem 0.3rem;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.3rem;
+        transition: all 0.2s ease;
+    }
+
+    .mobile-chart-item[data-shift="1"] {
+        border-left: 2px solid rgba(59, 130, 246, 0.7);
+    }
+
+    .mobile-chart-item[data-shift="2"] {
+        border-left: 2px solid rgba(34, 197, 94, 0.7);
+    }
+
+    .mobile-chart-item[data-shift="N1"] {
+        border-left: 2px solid rgba(251, 191, 36, 0.7);
+    }
+
+    .mobile-chart-item[data-shift="N2"] {
+        border-left: 2px solid rgba(99, 102, 241, 0.7);
+    }
+
+    .mobile-chart-item[data-shift="P1"],
+    .mobile-chart-item[data-shift="P2"] {
+        border-left: 2px solid rgba(245, 158, 11, 0.7);
+    }
+
+    .mobile-chart-item[data-shift="Off"] {
+        border-left: 2px solid rgba(107, 114, 128, 0.7);
+    }
+
+    .mobile-chart-item[data-shift="Other"] {
+        border-left: 2px solid rgba(147, 51, 234, 0.7);
+    }
+
+    .mobile-chart-label {
+        font-size: 0.6rem;
+        text-align: left;
+        color: var(--text-color);
+        line-height: 1.1;
+        flex: 1;
+    }
+
+    .mobile-chart-count {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--highlight-color);
+        min-width: 1.5rem;
+        text-align: right;
+    }
+
+    /* === TABLES === */
+    .table-container,
+    .compare-table-container {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        width: 100%;
+    }
+
+    table,
+    .compare-table {
+        font-size: 0.6rem;
+        width: 100%;
+    }
+
+    /* First column (Lp.) */
+    th:first-child,
+    td:first-child {
+        min-width: 24px !important;
+        width: 24px !important;
+        max-width: 24px !important;
+        padding: 0.2rem 0.1rem !important;
+        font-size: 0.55rem !important;
+    }
+
+    /* Name column */
+    .th-name,
+    .td-name,
+    .compare-th-name,
+    .compare-td-name {
+        min-width: 90px !important;
+        max-width: 90px !important;
+        font-size: 0.6rem !important;
+        padding: 0.2rem 0.3rem !important;
+        line-height: 1.1;
+        position: sticky;
+        left: 24px;
+        background: var(--panel-bg);
+        z-index: 5;
+    }
+
+    thead .th-name,
+    thead .compare-th-name {
+        z-index: 15;
+    }
+
+    /* Day columns */
+    .th-day,
+    .td-shift,
+    .compare-th-day,
+    .compare-td-shift {
+        min-width: 26px !important;
+        width: 26px !important;
+        max-width: 26px !important;
+        font-size: 0.55rem !important;
+        padding: 0.2rem 0.05rem !important;
+        line-height: 1.1;
+    }
+
+    /* Hide employee stats in table */
+    .td-name .employee-stats,
+    .compare-td-name .employee-stats {
+        display: none !important;
+    }
+
+    .employee-name-section {
+        gap: 0.2rem !important;
+    }
+
+    .employee-name-text {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    /* Table headers sticky */
+    thead th {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+
+    /* === LEGEND === */
+    #legend {
+        max-height: 20vh;
+        overflow-y: auto;
+        margin-bottom: 0.5rem !important;
+    }
+
+    #legend h3 {
+        font-size: 0.8rem !important;
+        margin-bottom: 0.3rem !important;
+    }
+
+    .legend-grid {
+        grid-template-columns: 1fr !important;
+        gap: 0.2rem !important;
+    }
+
+    .legend-item {
+        font-size: 0.6rem !important;
+        padding: 0.2rem 0.3rem !important;
+        line-height: 1.1;
+    }
+
+    .legend-dot {
+        width: 0.45rem !important;
+        height: 0.45rem !important;
+        margin-right: 0.2rem !important;
+    }
+
+    /* === DAILY SUMMARY === */
+    #daily-details {
+        max-height: calc(100vh - 380px);
+        overflow-y: auto;
+    }
+
+    .shift-group {
+        margin-bottom: 0.5rem !important;
+        padding: 0.4rem !important;
+    }
+
+    .shift-group h4 {
+        font-size: 0.75rem !important;
+        margin-bottom: 0.3rem !important;
+    }
+
+    .shift-group h4 .shift-icon {
+        width: 1.25rem !important;
+        height: 1.25rem !important;
+    }
+
+    .employee-tag {
+        font-size: 0.65rem !important;
+        padding: 0.2rem 0.4rem !important;
+        margin: 0.1rem !important;
+    }
+
+    .shift-code {
+        font-size: 0.7rem !important;
+        margin-left: 0.3rem !important;
+    }
+
+    /* === INDIVIDUAL VIEW === */
+    #individual-view {
+        padding: 0 !important;
+    }
+
+    .individual-grid {
+        grid-template-columns: 1fr !important;
+        gap: 0.6rem !important;
+    }
+
+    /* Calendar takes priority - full width */
+    .calendar-section {
+        order: 1 !important;
+    }
+
+    .summary-section {
+        order: 2 !important;
+    }
+
+    .employee-title,
+    .compare-title {
+        font-size: 0.9rem !important;
+        margin-bottom: 0.4rem !important;
+        padding: 0.3rem 0 !important;
+    }
+
+    .work-stats-summary {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 0.3rem !important;
+        margin-bottom: 0.4rem !important;
+    }
+
+    .stat-card {
+        padding: 0.3rem !important;
+        gap: 0.3rem !important;
+    }
+
+    .stat-card-primary,
+    .stat-card-overtime {
+        border-width: 1px !important;
+    }
+
+    .stat-icon {
+        width: 1.5rem !important;
+        height: 1.5rem !important;
+        font-size: 0.9rem !important;
+    }
+
+    .stat-icon .shift-icon {
+        width: 1.5rem !important;
+        height: 1.5rem !important;
+    }
+
+    .stat-label {
+        font-size: 0.5rem !important;
+        margin-bottom: 0.05rem !important;
+        line-height: 1.1;
+    }
+
+    .stat-value {
+        font-size: 0.7rem !important;
+        line-height: 1.1;
+    }
+
+    .stat-content {
+        min-width: 0;
+    }
+
+    /* === CALENDAR === */
+    .calendar-section {
+        padding: 0 !important;
+    }
+
+    .calendar-section h3 {
+        font-size: 0.8rem !important;
+        margin-bottom: 0.3rem !important;
+    }
+
+    .calendar-grid {
+        gap: 0.2rem !important;
+        grid-template-columns: repeat(7, 1fr) !important;
+    }
+
+    .calendar-day-name {
+        font-size: 0.5rem !important;
+        margin-bottom: 0.1rem !important;
+        padding: 0.2rem 0 !important;
+    }
+
+    .calendar-day {
+        height: auto !important;
+        min-height: 2.8rem !important;
+        font-size: 0.65rem !important;
+        padding: 0.25rem 0.15rem !important;
+        border-width: 2px !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: center !important;
+        align-items: center !important;
+        gap: 0.15rem !important;
+        transition: transform 0.15s ease, box-shadow 0.15s ease !important;
+        cursor: pointer !important;
+    }
+
+    .calendar-day:active {
+        transform: scale(0.95) !important;
+    }
+
+    .calendar-day .day-number {
+        font-size: 0.75rem !important;
+        font-weight: 700 !important;
+        line-height: 1 !important;
+        color: var(--text-color) !important;
+    }
+
+    .calendar-day .day-shift {
+        font-size: 0.7rem !important;
+        font-weight: 700 !important;
+        line-height: 1 !important;
+        margin-top: 0 !important;
+        padding: 0.1rem 0.2rem !important;
+        border-radius: 0 !important;
+        background: rgba(255, 255, 255, 0.3) !important;
+    }
+
+    :root[theme="dark"] .calendar-day .day-shift {
+        background: rgba(0, 0, 0, 0.3) !important;
+    }
+
+    /* Empty calendar days */
+    .cal-empty .day-shift {
+        background: transparent !important;
+    }
+
+    /* Enhanced calendar shift colors for mobile */
+    .cal-shift-1 {
+        background: rgba(59, 130, 246, 0.25) !important;
+        border-color: #3b82f6 !important;
+    }
+
+    .cal-shift-2 {
+        background: rgba(34, 197, 94, 0.25) !important;
+        border-color: #22c55e !important;
+    }
+
+    .cal-shift-n1 {
+        background: rgba(251, 191, 36, 0.3) !important;
+        border-color: #fbbf24 !important;
+    }
+
+    .cal-shift-n2 {
+        background: rgba(99, 102, 241, 0.3) !important;
+        border-color: #6366f1 !important;
+    }
+
+    .cal-shift-p1 {
+        background: rgba(245, 158, 11, 0.25) !important;
+        border-color: #f59e0b !important;
+    }
+
+    .cal-shift-p2 {
+        background: rgba(217, 119, 6, 0.25) !important;
+        border-color: #d97706 !important;
+    }
+
+    .cal-shift-off {
+        background: rgba(148, 163, 184, 0.2) !important;
+        border-color: #94a3b8 !important;
+    }
+
+    .cal-shift-other {
+        background: rgba(168, 85, 247, 0.25) !important;
+        border-color: #a855f7 !important;
+    }
+
+    /* Dark mode calendar adjustments */
+    :root[theme="dark"] .cal-shift-1 {
+        background: rgba(59, 130, 246, 0.35) !important;
+        border-color: #60a5fa !important;
+    }
+
+    :root[theme="dark"] .cal-shift-2 {
+        background: rgba(34, 197, 94, 0.35) !important;
+        border-color: #4ade80 !important;
+    }
+
+    :root[theme="dark"] .cal-shift-n1 {
+        background: rgba(251, 191, 36, 0.4) !important;
+        border-color: #fcd34d !important;
+    }
+
+    :root[theme="dark"] .cal-shift-n2 {
+        background: rgba(99, 102, 241, 0.4) !important;
+        border-color: #818cf8 !important;
+    }
+
+    :root[theme="dark"] .cal-shift-p1 {
+        background: rgba(245, 158, 11, 0.35) !important;
+        border-color: #fbbf24 !important;
+    }
+
+    :root[theme="dark"] .cal-shift-p2 {
+        background: rgba(217, 119, 6, 0.35) !important;
+        border-color: #fb923c !important;
+    }
+
+    :root[theme="dark"] .cal-shift-off {
+        background: rgba(148, 163, 184, 0.3) !important;
+        border-color: #cbd5e1 !important;
+    }
+
+    :root[theme="dark"] .cal-shift-other {
+        background: rgba(168, 85, 247, 0.35) !important;
+        border-color: #c084fc !important;
+    }
+
+    /* === SUMMARY SECTION (chart) === */
+    .summary-section {
+        padding: 0 !important;
+    }
+
+    .summary-section h3 {
+        font-size: 0.8rem !important;
+        margin-bottom: 0.3rem !important;
+    }
+
+    .summary-section .chart-container {
+        height: 180px !important;
+        min-height: 180px !important;
+    }
+
+    .summary-section .chart-container canvas {
+        max-height: 180px !important;
+    }
+
+    /* === COMPARE VIEW === */
+    #compare-view {
+        padding: 0 !important;
+    }
+
+    .compare-title {
+        font-size: 0.9rem !important;
+    }
+
+    .compare-grid {
+        gap: 0.5rem !important;
+    }
+
+    #back-to-full-schedule,
+    #back-from-compare {
+        margin-bottom: 0.5rem !important;
+    }
+
+    /* === BUTTONS === */
+    .btn-primary {
+        width: auto;
+        padding: 0.4rem 0.6rem !important;
+        font-size: 0.75rem !important;
+    }
+
+    .btn-import,
+    .btn-clear,
+    .btn-compare {
+        padding: 0.4rem 0.5rem !important;
+        font-size: 0.65rem !important;
+        flex: 1;
+        min-width: 0;
+    }
+
+    .btn-import i,
+    .btn-clear i,
+    .btn-compare i {
+        font-size: 0.65rem;
+        margin-right: 0.2rem;
+    }
+
+    /* === CONTROLS === */
+    .controls {
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem !important;
+    }
+
+    .section-header {
+        margin-bottom: 0.4rem !important;
+    }
+
+    .section-header h2,
+    .section-header h3 {
+        font-size: 0.85rem !important;
+        margin-bottom: 0.3rem !important;
+    }
+
+    .import-wrapper {
+        display: flex;
+        gap: 0.3rem;
+        flex-wrap: wrap;
+    }
+
+    /* === SEARCH - Toggle on mobile === */
+    .search-wrapper {
+        position: relative;
+    }
+
+    .search-wrapper input {
+        font-size: 16px !important;
+        display: none;
+        width: 100%;
+        padding: 0.4rem 0.4rem 0.4rem 2rem !important;
+    }
+
+    .search-wrapper input.mobile-search-active {
+        display: block !important;
+    }
+
+    .search-wrapper .search-icon {
+        cursor: pointer;
+        font-size: 1.1rem;
+        padding: 0.4rem;
+        color: var(--text-color);
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 0;
+        transition: all 0.2s ease;
+    }
+
+    .search-wrapper .search-icon:hover {
+        background: var(--highlight-color);
+        color: white;
+    }
+
+    .search-wrapper.mobile-search-open .search-icon {
+        position: absolute;
+        left: 0.4rem;
+        top: 50%;
+        transform: translateY(-50%);
+        background: transparent;
+        border: none;
+        padding: 0;
+        z-index: 2;
+    }
+
+    /* === BADGES === */
+    .priority-badge,
+    .sa-badge,
+    .light-blue-badge,
+    .k-badge,
+    .m-badge,
+    .yard-badge {
+        font-size: 0.45rem !important;
+        padding: 0.05rem 0.15rem !important;
+        margin-right: 0.15rem !important;
+    }
+
+    /* === CHECKBOXES === */
+    input[type="checkbox"].compare-checkbox {
+        width: 12px !important;
+        height: 12px !important;
+        margin: 0 !important;
+    }
+
+    /* === STATUS MESSAGES === */
+    #import-status {
+        font-size: 0.65rem !important;
+        padding: 0.3rem 0.4rem !important;
+        margin-top: 0.2rem !important;
+        width: 100%;
+    }
+
+    /* === SECTION DESCRIPTIONS === */
+    .section-header .description {
+        display: none !important;
+    }
+}
+
+/* ============================================
+   VERY SMALL SCREENS (≤576px)
+   ============================================ */
+@media (max-width: 576px) {
+    .container {
+        padding: 0.2rem !important;
+    }
+
+    .header h1 {
+        font-size: 0.9rem !important;
+    }
+
+    .header .subtitle {
+        font-size: 0.65rem !important;
+    }
+
+    .mobile-tab {
+        font-size: 0.7rem;
+        padding: 0.35rem 0.4rem;
+    }
+
+    /* Tables - even smaller */
+    th:first-child,
+    td:first-child {
+        min-width: 22px !important;
+        width: 22px !important;
+        font-size: 0.5rem !important;
+    }
+
+    .th-name,
+    .td-name,
+    .compare-th-name,
+    .compare-td-name {
+        min-width: 80px !important;
+        max-width: 80px !important;
+        font-size: 0.55rem !important;
+        left: 22px;
+    }
+
+    .th-day,
+    .td-shift,
+    .compare-th-day,
+    .compare-td-shift {
+        min-width: 24px !important;
+        width: 24px !important;
+        font-size: 0.5rem !important;
+        padding: 0.15rem 0.05rem !important;
+    }
+
+    /* Charts smaller */
+    .chart-container {
+        min-height: auto !important;
+    }
+
+    /* Mobile chart numbers - keep 2 columns but smaller */
+    .mobile-chart-grid {
+        gap: 0.2rem !important;
+    }
+
+    .mobile-chart-item {
+        padding: 0.2rem 0.25rem !important;
+    }
+
+    .mobile-chart-label {
+        font-size: 0.55rem !important;
+    }
+
+    .mobile-chart-count {
+        font-size: 1rem !important;
+        min-width: 1.25rem !important;
+    }
+
+    .mobile-chart-title {
+        font-size: 0.7rem !important;
+        margin-bottom: 0.2rem !important;
+    }
+
+    /* Work stats - single column */
+    .work-stats-summary {
+        grid-template-columns: 1fr !important;
+        gap: 0.25rem !important;
+    }
+
+    .stat-card {
+        padding: 0.25rem !important;
+    }
+
+    .stat-icon {
+        width: 1.25rem !important;
+        height: 1.25rem !important;
+    }
+
+    .stat-icon .shift-icon {
+        width: 1.25rem !important;
+        height: 1.25rem !important;
+    }
+
+    .stat-label {
+        font-size: 0.45rem !important;
+    }
+
+    .stat-value {
+        font-size: 0.65rem !important;
+    }
+
+    /* Legend - single column */
+    .legend-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    .legend-item {
+        font-size: 0.55rem !important;
+        padding: 0.15rem 0.25rem !important;
+    }
+
+    .legend-dot {
+        width: 0.4rem !important;
+        height: 0.4rem !important;
+    }
+
+    /* Buttons - smaller */
+    .btn-import,
+    .btn-clear,
+    .btn-compare {
+        font-size: 0.6rem !important;
+        padding: 0.35rem 0.4rem !important;
+    }
+
+    /* Day selector smaller */
+    .mobile-day-btn {
+        width: 2.25rem !important;
+        height: 2.25rem !important;
+        font-size: 1.1rem !important;
+    }
+
+    .mobile-day-display {
+        min-height: 2.25rem !important;
+        padding: 0.25rem !important;
+    }
+
+    .mobile-day-number {
+        font-size: 1rem !important;
+    }
+
+    .mobile-day-date {
+        font-size: 0.55rem !important;
+    }
+
+    .day-selector-wrapper input[type="range"] {
+        height: 10px !important;
+        border-radius: 0 !important;
+    }
+
+    .day-selector-wrapper input[type="range"]::-webkit-slider-thumb {
+        width: 28px !important;
+        height: 28px !important;
+    }
+
+    .day-selector-wrapper input[type="range"]::-moz-range-thumb {
+        width: 28px !important;
+        height: 28px !important;
+    }
+
+    .day-selector-wrapper input[type="range"]::-webkit-slider-runnable-track {
+        height: 10px !important;
+        border-radius: 0 !important;
+    }
+
+    .day-selector-wrapper input[type="range"]::-moz-range-track {
+        height: 10px !important;
+        border-radius: 0 !important;
+    }
+
+    .day-selector-wrapper input[type="range"]::-moz-range-progress {
+        height: 10px !important;
+        border-radius: 0 !important;
+    }
+
+    .day-marker {
+        font-size: 0.4rem !important;
+    }
+
+    /* Calendar */
+    .calendar-grid {
+        gap: 0.15rem !important;
+    }
+
+    .calendar-day {
+        min-height: 2.5rem !important;
+        padding: 0.2rem 0.1rem !important;
+        gap: 0.1rem !important;
+    }
+
+    .calendar-day .day-number {
+        font-size: 0.7rem !important;
+    }
+
+    .calendar-day .day-shift {
+        font-size: 0.65rem !important;
+        padding: 0.05rem 0.15rem !important;
+    }
+
+    .calendar-day-name {
+        font-size: 0.45rem !important;
+        padding: 0.15rem 0 !important;
+    }
+
+    /* Employee tags */
+    .employee-tag {
+        font-size: 0.6rem !important;
+        padding: 0.15rem 0.3rem !important;
+    }
+
+    /* Individual view titles */
+    .employee-title,
+    .compare-title {
+        font-size: 0.8rem !important;
+    }
+
+    .calendar-section h3,
+    .summary-section h3 {
+        font-size: 0.75rem !important;
+    }
+
+    /* Summary chart smaller */
+    .summary-section .chart-container {
+        height: 150px !important;
+        min-height: 150px !important;
+    }
+}
