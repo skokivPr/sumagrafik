@@ -79,6 +79,19 @@ function clearLocalStorage() {
 let dailyChartInstance;
 let individualChartInstance;
 
+// Debounce utility for performance
+const debounce = (func, wait) => {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+};
+
 const shiftColors = {
     '1': 'rgba(59, 130, 246, 0.7)',
     '2': 'rgba(34, 197, 94, 0.7)',
@@ -137,25 +150,24 @@ const calculateWorkStats = (schedule) => {
         const trimmedShift = shift.trim();
 
         // Skip days off (no work, no hours)
-        if (['X', 'x', 'ZW', 'zw'].includes(trimmedShift)) return;
+        // N = Nieobecny (absent), X = wolne, u = urlop off, ZW = zwolnienie
+        if (['X', 'x', 'ZW', 'zw', 'N'].includes(trimmedShift)) return;
 
         // Count as work day
         workDays++;
 
         // Count hours based on shift type (12h system)
+        // All work shifts count as 12h
         if (trimmedShift === '1' || trimmedShift === '2') {
             totalHours += 12;
         } else if (trimmedShift === 'N1' || trimmedShift === 'N2') {
-            // N1, N2 - night overtime shifts
-            totalHours += 14;
-        } else if (trimmedShift.startsWith('N') && !trimmedShift.startsWith('NP')) {
-            // N - regular night shift
+            // N1, N2 - overtime shifts also count as 12h
             totalHours += 12;
         } else if (trimmedShift === 'P1' || trimmedShift === 'P2') {
             totalHours += 12;
         } else if (trimmedShift === 'NP1' || trimmedShift === 'NP2') {
-            // Overtime - 12h base + overtime
-            totalHours += 14;
+            // PWRO5 Overtime also counts as 12h
+            totalHours += 12;
         } else if (trimmedShift === 'U' || trimmedShift === 'u') {
             // U (urlop) - vacation day but no work hours
             // Already counted as workDay
@@ -218,20 +230,6 @@ const renderFullTable = (filter = '') => {
     headerHtml += '</tr>';
     tableHead.innerHTML = headerHtml;
 
-    // Select all checkbox handler
-    document.getElementById('select-all')?.addEventListener('change', (e) => {
-        const checkboxes = document.querySelectorAll('.employee-checkbox');
-        checkboxes.forEach(cb => {
-            cb.checked = e.target.checked;
-            if (e.target.checked) {
-                state.selectedEmployees.add(cb.dataset.employee);
-            } else {
-                state.selectedEmployees.clear();
-            }
-        });
-        updateCompareButton();
-    });
-
     let bodyHtml = '';
 
     if (scheduleData.length === 0) {
@@ -248,7 +246,8 @@ const renderFullTable = (filter = '') => {
         return;
     }
 
-    filteredData.forEach((employee, index) => {
+    // Use array for better performance than string concatenation
+    const rows = filteredData.map((employee, index) => {
         const isSelected = state.selectedEmployees.has(employee.name);
         // Last 24 rows are Yard workers
         const totalRows = filteredData.length;
@@ -289,15 +288,8 @@ const renderFullTable = (filter = '') => {
         // Calculate work statistics
         const stats = calculateWorkStats(employee.schedule);
 
-        bodyHtml += `<tr class="${rowClass}" data-employee="${employee.name}">`;
-        bodyHtml += `<td class="td-checkbox"><input type="checkbox" class="employee-checkbox" data-employee="${employee.name}" ${isSelected ? 'checked' : ''}></td>`;
-        bodyHtml += `<td class="td-name">
-            <div class="employee-name-section">
-                <span class="employee-name-text">${badge}${employee.name}</span>
-                <span class="employee-stats">${stats.workDays}dni • ${stats.totalHours}h</span>
-            </div>
-        </td>`;
-        employee.schedule.forEach(shift => {
+        // Build shift cells using map for better performance
+        const shiftCells = employee.schedule.map(shift => {
             const category = getShiftCategory(shift);
             let bgColor = '';
             if (category === '1') bgColor = 'shift-1';
@@ -308,15 +300,34 @@ const renderFullTable = (filter = '') => {
             else if (category === 'Off') bgColor = 'shift-off';
             else if (category === 'Other') bgColor = 'shift-other';
 
-            bodyHtml += `<td class="td-shift ${bgColor}">${shift || ''}</td>`;
-        });
-        bodyHtml += '</tr>';
-    });
-    tableBody.innerHTML = bodyHtml;
+            return `<td class="td-shift ${bgColor}">${shift || ''}</td>`;
+        }).join('');
 
-    // Checkbox handlers
-    document.querySelectorAll('.employee-checkbox').forEach(checkbox => {
-        checkbox.addEventListener('change', (e) => {
+        return `<tr class="${rowClass}" data-employee="${employee.name}">
+            <td class="td-checkbox"><input type="checkbox" class="employee-checkbox" data-employee="${employee.name}" ${isSelected ? 'checked' : ''}></td>
+            <td class="td-name">
+                <div class="employee-name-section">
+                    <span class="employee-name-text">${badge}${employee.name}</span>
+                    <span class="employee-stats">${stats.workDays}dni • ${stats.totalHours}h</span>
+                </div>
+            </td>${shiftCells}</tr>`;
+    });
+
+    tableBody.innerHTML = rows.join('');
+};
+
+// Event delegation for table - set up ONCE instead of on every render
+let tableBodyListenersInitialized = false;
+const initializeTableEventDelegation = () => {
+    if (tableBodyListenersInitialized) return;
+
+    const tableBody = document.getElementById('table-body');
+    const tableHead = document.getElementById('table-head');
+    if (!tableBody) return;
+
+    // Single delegated handler for all checkboxes
+    tableBody.addEventListener('change', (e) => {
+        if (e.target.classList.contains('employee-checkbox')) {
             e.stopPropagation();
             const employeeName = e.target.dataset.employee;
             if (e.target.checked) {
@@ -325,24 +336,78 @@ const renderFullTable = (filter = '') => {
                 state.selectedEmployees.delete(employeeName);
             }
             updateCompareButton();
-        });
+        }
     });
 
-    document.querySelectorAll('#table-body tr').forEach(row => {
-        row.addEventListener('click', (e) => {
-            if (e.target.type === 'checkbox') return;
-            state.selectedEmployee = e.currentTarget.dataset.employee;
+    // Single delegated handler for checkbox cell clicks
+    tableBody.addEventListener('click', (e) => {
+        // If clicked on checkbox itself, let the change event handle it
+        if (e.target.type === 'checkbox') return;
+
+        // Check if clicked on checkbox cell
+        const checkboxCell = e.target.closest('.td-checkbox');
+        if (checkboxCell) {
+            e.stopPropagation();
+            const checkbox = checkboxCell.querySelector('input[type="checkbox"]');
+            if (checkbox) {
+                checkbox.checked = !checkbox.checked;
+                // Trigger change event
+                checkbox.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+            return;
+        }
+
+        // Handle row click for individual view
+        const row = e.target.closest('tr');
+        if (row && row.dataset.employee) {
+            state.selectedEmployee = row.dataset.employee;
             showIndividualView();
-        });
+        }
     });
+
+    // Handler for header checkbox cell click
+    if (tableHead) {
+        tableHead.addEventListener('click', (e) => {
+            // If clicked on checkbox itself, let it work normally
+            if (e.target.type === 'checkbox') return;
+
+            // Check if clicked on checkbox header cell
+            const checkboxCell = e.target.closest('.th-checkbox');
+            if (checkboxCell) {
+                e.stopPropagation();
+                const checkbox = checkboxCell.querySelector('input[type="checkbox"]');
+                if (checkbox) {
+                    checkbox.checked = !checkbox.checked;
+                    // Trigger change event
+                    checkbox.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+            }
+        });
+
+        // Handler for select-all checkbox change
+        tableHead.addEventListener('change', (e) => {
+            if (e.target.id === 'select-all') {
+                const checkboxes = document.querySelectorAll('.employee-checkbox');
+                checkboxes.forEach(cb => {
+                    cb.checked = e.target.checked;
+                    if (e.target.checked) {
+                        state.selectedEmployees.add(cb.dataset.employee);
+                    } else {
+                        state.selectedEmployees.clear();
+                    }
+                });
+                updateCompareButton();
+            }
+        });
+    }
+
+    tableBodyListenersInitialized = true;
 };
 
 // Render day markers for the slider
 const renderDayMarkers = () => {
     const container = document.getElementById('day-markers');
     if (!container) return;
-
-    container.innerHTML = '';
 
     // Get the number of days in the month
     const daysInMonth = 31;
@@ -351,29 +416,108 @@ const renderDayMarkers = () => {
     // 0=Mon, 1=Tue, 2=Wed, 3=Thu, 4=Fri, 5=Sat, 6=Sun
     const firstDayOfWeek = 2; // Wednesday
 
-    for (let day = 1; day <= daysInMonth; day++) {
+    // Build HTML using template literals for better performance
+    const markersHtml = Array.from({ length: daysInMonth }, (_, i) => {
+        const day = i + 1;
         const dayOfWeek = (firstDayOfWeek + day - 1) % 7;
-        const isWeekend = dayOfWeek === 5 || dayOfWeek === 6; // Saturday or Sunday
+        const isWeekend = dayOfWeek === 5 || dayOfWeek === 6;
+        const isActive = day === state.selectedDay;
 
-        const marker = document.createElement('div');
-        marker.className = `day-marker${isWeekend ? ' weekend' : ''}${day === state.selectedDay ? ' active' : ''}`;
-        marker.setAttribute('data-day', day);
-
-        marker.innerHTML = `
+        return `<div class="day-marker${isWeekend ? ' weekend' : ''}${isActive ? ' active' : ''}" data-day="${day}">
             <div class="day-marker-tick"></div>
             <div class="day-marker-label">${day}</div>
-        `;
+        </div>`;
+    }).join('');
 
-        marker.addEventListener('click', () => {
-            state.selectedDay = day;
-            document.getElementById('day-selector').value = day;
-            document.getElementById('day-value').textContent = day;
-            renderDayMarkers();
-            renderDailySummary();
+    container.innerHTML = markersHtml;
+};
+
+// Hover effect for rows and columns
+let tableHoverInitialized = false;
+const initializeTableHover = () => {
+    if (tableHoverInitialized) return;
+
+    const tableBody = document.getElementById('table-body');
+    const tableHead = document.querySelector('.sticky-header');
+    if (!tableBody || !tableHead) return;
+
+    tableBody.addEventListener('mouseover', (e) => {
+        const cell = e.target.closest('.td-shift');
+        if (!cell) return;
+
+        const row = cell.closest('tr');
+        if (!row) return;
+
+        // Highlight row
+        row.classList.add('row-hover');
+
+        // Get column index (accounting for checkbox and name columns)
+        const cellIndex = Array.from(row.children).indexOf(cell);
+
+        // Highlight all cells in the same column (body)
+        const allRows = tableBody.querySelectorAll('tr');
+        allRows.forEach(r => {
+            const targetCell = r.children[cellIndex];
+            if (targetCell && targetCell.classList.contains('td-shift')) {
+                targetCell.classList.add('column-hover');
+            }
         });
 
-        container.appendChild(marker);
-    }
+        // Highlight header cell
+        const headerRow = tableHead.querySelector('tr');
+        if (headerRow) {
+            const headerCell = headerRow.children[cellIndex];
+            if (headerCell && headerCell.classList.contains('th-day')) {
+                headerCell.classList.add('column-hover');
+            }
+        }
+    });
+
+    tableBody.addEventListener('mouseout', (e) => {
+        const cell = e.target.closest('.td-shift');
+        if (!cell) return;
+
+        const row = cell.closest('tr');
+        if (row) {
+            row.classList.remove('row-hover');
+        }
+
+        // Remove column highlight from body
+        const allCells = tableBody.querySelectorAll('.td-shift');
+        allCells.forEach(c => c.classList.remove('column-hover'));
+
+        // Remove column highlight from header
+        const headerCells = tableHead.querySelectorAll('.th-day');
+        headerCells.forEach(c => c.classList.remove('column-hover'));
+    });
+
+    tableHoverInitialized = true;
+};
+
+// Event delegation for day markers - set up ONCE
+let dayMarkersListenerInitialized = false;
+const initializeDayMarkersEventDelegation = () => {
+    if (dayMarkersListenerInitialized) return;
+
+    const container = document.getElementById('day-markers');
+    if (!container) return;
+
+    // Single delegated handler for all day markers
+    container.addEventListener('click', (e) => {
+        const marker = e.target.closest('.day-marker');
+        if (marker) {
+            const day = parseInt(marker.dataset.day, 10);
+            if (day) {
+                state.selectedDay = day;
+                document.getElementById('day-selector').value = day;
+                document.getElementById('day-value').textContent = day;
+                renderDayMarkers();
+                renderDailySummary();
+            }
+        }
+    });
+
+    dayMarkersListenerInitialized = true;
 };
 
 const renderDailySummary = () => {
@@ -434,19 +578,22 @@ const renderDailySummary = () => {
         return '';
     };
 
-    for (const category in categoryLabels) {
-        if (shifts[category].length > 0) {
-            detailsHtml += `<div class="shift-group shift-category-${category.toLowerCase()}">
-                        <h4>${categoryLabels[category]} (${shifts[category].length})</h4>
-                        <div class="employee-tags">`;
-            shifts[category].forEach(emp => {
-                const workerClass = getEmployeeWorkerClass(emp.index);
-                detailsHtml += `<span class="employee-tag ${workerClass}">${emp.name} <span class="shift-code">${emp.shift}</span></span>`;
-            });
-            detailsHtml += `</div></div>`;
-        }
-    }
-    dailyDetailsContainer.innerHTML = detailsHtml || '<p class="no-data">Brak danych dla tego dnia.</p>';
+    // Build HTML using array methods for better performance
+    const shiftGroups = Object.entries(categoryLabels).map(([category, label]) => {
+        if (shifts[category].length === 0) return '';
+
+        const tags = shifts[category].map(emp => {
+            const workerClass = getEmployeeWorkerClass(emp.index);
+            return `<span class="employee-tag ${workerClass}">${emp.name} <span class="shift-code">${emp.shift}</span></span>`;
+        }).join('');
+
+        return `<div class="shift-group shift-category-${category.toLowerCase()}">
+                    <h4>${label} (${shifts[category].length})</h4>
+                    <div class="employee-tags">${tags}</div>
+                </div>`;
+    }).filter(html => html !== '').join('');
+
+    dailyDetailsContainer.innerHTML = shiftGroups || '<p class="no-data">Brak danych dla tego dnia.</p>';
 
     updateDailyChart();
 };
@@ -549,56 +696,75 @@ const updateDailyChart = () => {
     };
 
     const ctx = canvas.getContext('2d');
+
+    // Update existing chart instead of destroying and recreating
     if (dailyChartInstance) {
-        dailyChartInstance.destroy();
-    }
-    dailyChartInstance = new Chart(ctx, {
-        type: 'bar',
-        data: chartData,
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { display: false },
-                title: {
-                    display: true,
-                    text: 'Rozkład zmian w ciągu dnia',
-                    font: { size: 16 },
-                    color: textColor
-                }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: {
-                        stepSize: 1,
+        // Update data
+        dailyChartInstance.data.datasets[0].data = [counts['1'], counts['2'], counts['N1'], counts['N2'], counts['P1'], counts['P2'], counts['Off'], counts['Other']];
+        dailyChartInstance.data.datasets[0].borderColor = isDark ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.2)';
+        // Update colors
+        dailyChartInstance.options.plugins.title.color = textColor;
+        dailyChartInstance.options.scales.x.ticks.color = textColor;
+        dailyChartInstance.options.scales.y.ticks.color = textColor;
+        dailyChartInstance.options.scales.x.grid.color = gridColor;
+        dailyChartInstance.options.scales.y.grid.color = gridColor;
+        // Update without animation for instant feedback
+        dailyChartInstance.update('none');
+    } else {
+        // Create chart only once
+        dailyChartInstance = new Chart(ctx, {
+            type: 'bar',
+            data: chartData,
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: {
+                    duration: 300 // Reduced from default 1000ms
+                },
+                plugins: {
+                    legend: { display: false },
+                    title: {
+                        display: true,
+                        text: 'Rozkład zmian w ciągu dnia',
+                        font: { size: 16 },
                         color: textColor
-                    },
-                    grid: {
-                        color: gridColor
                     }
                 },
-                x: {
-                    ticks: {
-                        color: textColor
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1,
+                            color: textColor
+                        },
+                        grid: {
+                            color: gridColor
+                        }
                     },
-                    grid: {
-                        color: gridColor
+                    x: {
+                        ticks: {
+                            color: textColor
+                        },
+                        grid: {
+                            color: gridColor
+                        }
                     }
                 }
             }
-        }
-    });
+        });
+    }
 };
 
 // Update compare button
 function updateCompareButton() {
     const compareBtn = document.getElementById('compare-btn');
     const compareCount = document.getElementById('compare-count');
+    const resetBtn = document.getElementById('reset-selection-btn');
     const count = state.selectedEmployees.size;
 
     compareCount.textContent = count;
     compareBtn.disabled = count < 2;
+    resetBtn.disabled = count === 0;
 
     if (count >= 2) {
         compareBtn.title = `Porównaj ${count} pracowników`;
@@ -640,15 +806,15 @@ const showIndividualView = () => {
     // Calculate work statistics
     const stats = calculateWorkStats(employee.schedule);
 
-    // Calculate detailed shift hours
+    // Calculate detailed shift hours (all shifts count as 12h)
     let shift1Hours = counts['1'] * 12;
     let shift2Hours = counts['2'] * 12;
-    let shiftN1Hours = counts['N1'] * 14; // Nadgodziny dzienne
-    let shiftN2Hours = counts['N2'] * 14; // Nadgodziny nocne
+    let shiftN1Hours = counts['N1'] * 12; // Nadgodziny dzienne
+    let shiftN2Hours = counts['N2'] * 12; // Nadgodziny nocne
     let shiftP1Hours = counts['P1'] * 12;
     let shiftP2Hours = counts['P2'] * 12;
-    let np1Hours = np1Count * 14;
-    let np2Hours = np2Count * 14;
+    let np1Hours = np1Count * 12;
+    let np2Hours = np2Count * 12;
 
     let calendarHtml = `<div class="calendar-grid">`;
     const daysOfWeek = ['Pn', 'Wt', 'Śr', 'Cz', 'Pt', 'So', 'Nd'];
@@ -854,6 +1020,62 @@ const showFullSchedule = () => {
     state.selectedEmployee = null;
 };
 
+// Helper function to get employee group
+const getEmployeeGroup = (originalIndex) => {
+    const totalRows = scheduleData.length;
+    const isYardWorker = originalIndex >= (totalRows - YARD_ROWS_COUNT);
+    const isMWorker = originalIndex >= (totalRows - YARD_ROWS_COUNT - M_ROWS_COUNT) && originalIndex < (totalRows - YARD_ROWS_COUNT);
+    const isPriorityWorker = originalIndex < PRIORITY_ROWS_COUNT;
+    const isSAWorker = originalIndex >= PRIORITY_ROWS_COUNT && originalIndex < (PRIORITY_ROWS_COUNT + SA_ROWS_COUNT);
+    const isLightBlueWorker = originalIndex >= (PRIORITY_ROWS_COUNT + SA_ROWS_COUNT) && originalIndex < (PRIORITY_ROWS_COUNT + SA_ROWS_COUNT + LIGHT_BLUE_ROWS_COUNT);
+    const isKWorker = originalIndex >= (PRIORITY_ROWS_COUNT + SA_ROWS_COUNT + LIGHT_BLUE_ROWS_COUNT) && originalIndex < (PRIORITY_ROWS_COUNT + SA_ROWS_COUNT + LIGHT_BLUE_ROWS_COUNT + K_ROWS_COUNT);
+
+    if (isYardWorker) return 'Y';
+    if (isMWorker) return 'M';
+    if (isPriorityWorker) return 'D';
+    if (isSAWorker) return 'S';
+    if (isLightBlueWorker) return 'L';
+    if (isKWorker) return 'K';
+    return 'Other';
+};
+
+// Helper function to extract first name and first letter of last name
+const getEmployeeKey = (fullName) => {
+    const parts = fullName.trim().split(/\s+/);
+    if (parts.length < 2) return fullName; // If no last name, return as is
+    const firstName = parts[0];
+    const lastNameInitial = parts[parts.length - 1].charAt(0).toUpperCase();
+    return `${firstName} ${lastNameInitial}`;
+};
+
+// Filter out duplicate employees from different groups
+const filterDuplicatesFromDifferentGroups = (employees) => {
+    const nameGroupMap = new Map();
+    const toRemove = new Set();
+
+    // Identify duplicates from different groups and keep only first one
+    employees.forEach(emp => {
+        const originalIndex = scheduleData.findIndex(e => e.name === emp.name);
+        const group = getEmployeeGroup(originalIndex);
+        const key = getEmployeeKey(emp.name);
+
+        if (nameGroupMap.has(key)) {
+            const existing = nameGroupMap.get(key);
+            if (existing.group !== group) {
+                // Found duplicate from different group - remove the second one
+                toRemove.add(emp.name);
+            }
+        } else {
+            nameGroupMap.set(key, { name: emp.name, group });
+        }
+    });
+
+    // Filter out duplicates (keep only first occurrence)
+    const filtered = employees.filter(emp => !toRemove.has(emp.name));
+
+    return filtered;
+};
+
 // Compare view
 const showCompareView = () => {
     if (state.selectedEmployees.size < 2) return;
@@ -865,7 +1087,23 @@ const showCompareView = () => {
 
     const compareContent = document.getElementById('compare-content');
     const selectedNames = Array.from(state.selectedEmployees);
-    const employees = scheduleData.filter(emp => selectedNames.includes(emp.name));
+
+    // Get only selected employees (exact match by name)
+    let employees = scheduleData.filter(emp => selectedNames.includes(emp.name));
+
+    // Remove exact duplicates (same full name) - keep unique by full name
+    const uniqueEmployees = [];
+    const seenNames = new Set();
+    employees.forEach(emp => {
+        if (!seenNames.has(emp.name)) {
+            seenNames.add(emp.name);
+            uniqueEmployees.push(emp);
+        }
+    });
+    employees = uniqueEmployees;
+
+    // Filter out duplicates from different groups (same first name + last name initial)
+    employees = filterDuplicatesFromDifferentGroups(employees);
 
     let html = `<h2 class="compare-title">Porównanie harmonogramów (${employees.length} pracowników)</h2>`;
     html += '<div class="compare-table-container"><table class="compare-table">';
@@ -976,17 +1214,50 @@ function applyTheme(theme) {
 
 function toggleTheme() {
     const html = document.documentElement;
+    const body = document.body;
     const currentTheme = html.getAttribute('theme') === 'dark' ? 'dark' : 'light';
     const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+
+    // Add transitioning class for GPU optimization
+    body.classList.add('theme-transitioning');
+
     applyTheme(newTheme);
 
-    // Refresh charts with new theme colors
-    updateDailyChart();
+    // Use requestAnimationFrame to defer chart updates and avoid janky transitions
+    requestAnimationFrame(() => {
+        // Update chart colors only, don't rebuild entire charts
+        updateChartColors();
 
-    // If individual view is open, refresh individual chart
-    const individualView = document.getElementById('individual-view');
-    if (!individualView.classList.contains('hidden')) {
-        showIndividualView();
+        // Remove transitioning class immediately - instant theme change
+        setTimeout(() => {
+            body.classList.remove('theme-transitioning');
+        }, 50); // Minimal delay for DOM update
+    });
+}
+
+// Optimized function to update only chart colors, not rebuild
+function updateChartColors() {
+    const isDark = document.documentElement.getAttribute('theme') === 'dark';
+    const textColor = isDark ? '#e9ecef' : '#212529';
+    const gridColor = isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
+    const borderColor = isDark ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.2)';
+
+    // Update daily chart colors
+    if (dailyChartInstance) {
+        dailyChartInstance.options.plugins.title.color = textColor;
+        dailyChartInstance.options.scales.x.ticks.color = textColor;
+        dailyChartInstance.options.scales.y.ticks.color = textColor;
+        dailyChartInstance.options.scales.x.grid.color = gridColor;
+        dailyChartInstance.options.scales.y.grid.color = gridColor;
+        dailyChartInstance.data.datasets[0].borderColor = borderColor;
+        dailyChartInstance.update('none'); // 'none' mode = no animation for instant update
+    }
+
+    // Update individual chart colors
+    if (individualChartInstance) {
+        individualChartInstance.options.plugins.legend.labels.color = textColor;
+        individualChartInstance.data.datasets[0].borderColor = isDark ? 'rgba(25, 25, 25, 0.85)' : 'rgba(255, 255, 255, 0.85)';
+        individualChartInstance.update('none'); // 'none' mode = no animation for instant update
     }
 }
 
@@ -1048,6 +1319,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 3000);
     }
 
+    // Initialize event delegations (ONCE)
+    initializeTableEventDelegation();
+    initializeDayMarkersEventDelegation();
+    initializeTableHover();
+
     renderFullTable();
     renderDayMarkers();
     renderDailySummary();
@@ -1059,8 +1335,13 @@ document.addEventListener('DOMContentLoaded', () => {
         renderDailySummary();
     });
 
+    // Debounced search for performance
+    const debouncedSearch = debounce((value) => {
+        renderFullTable(value);
+    }, 150);
+
     document.getElementById('search-box').addEventListener('input', (e) => {
-        renderFullTable(e.target.value);
+        debouncedSearch(e.target.value);
     });
 
     document.getElementById('back-to-full-schedule').addEventListener('click', showFullSchedule);
@@ -1074,6 +1355,8 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('compare-btn').addEventListener('click', showCompareView);
 
     document.getElementById('back-from-compare').addEventListener('click', showFullSchedule);
+
+    document.getElementById('reset-selection-btn').addEventListener('click', handleResetSelection);
 });
 
 // Clear data handler
@@ -1097,6 +1380,25 @@ function handleClearData() {
             statusElement.className = 'import-status';
         }, 3000);
     }
+}
+
+// Reset selection handler
+function handleResetSelection() {
+    // Clear selected employees set
+    state.selectedEmployees.clear();
+
+    // Uncheck all checkboxes
+    const allCheckboxes = document.querySelectorAll('.employee-checkbox');
+    allCheckboxes.forEach(cb => cb.checked = false);
+
+    // Uncheck select-all checkbox
+    const selectAllCheckbox = document.getElementById('select-all');
+    if (selectAllCheckbox) {
+        selectAllCheckbox.checked = false;
+    }
+
+    // Update compare button state
+    updateCompareButton();
 }
 
 // Detect month from filename
@@ -1244,3 +1546,61 @@ function parseCSV(csvText) {
 
     return employees;
 }
+
+// Optimized column hover - minimal JavaScript
+let activeColumnLine = null;
+
+function initColumnHover() {
+    // Create single line element for reuse
+    const line = document.createElement('div');
+    line.className = 'column-hover-line-element';
+    line.style.cssText = 'position: absolute; width: 1px; background: rgba(var(--hover-bg), 0.6); pointer-events: none; z-index: 1; opacity: 0; overflow: hidden;';
+    document.body.appendChild(line);
+    activeColumnLine = line;
+
+    // Single event listener with delegation
+    document.addEventListener('mouseover', handleColumnHover);
+    document.addEventListener('mouseout', hideColumnLine);
+}
+
+function handleColumnHover(e) {
+    const target = e.target;
+
+    if (target.classList.contains('td-shift') ||
+        target.classList.contains('compare-td-shift') ||
+        target.classList.contains('th-day')) {
+
+        const rect = target.getBoundingClientRect();
+        const table = target.closest('.table-container, .compare-table-container');
+        const tableRect = table ? table.getBoundingClientRect() : target.closest('table').getBoundingClientRect();
+
+        if (activeColumnLine) {
+            activeColumnLine.style.left = rect.right + 'px';
+            activeColumnLine.style.top = tableRect.top + 'px';
+            activeColumnLine.style.height = tableRect.height + 'px';
+            activeColumnLine.style.opacity = '1';
+        }
+
+        // Add hover class only to current cell for background
+        target.classList.add('column-hover');
+    }
+}
+
+function hideColumnLine(e) {
+    const target = e.target;
+
+    if (target.classList.contains('td-shift') ||
+        target.classList.contains('compare-td-shift') ||
+        target.classList.contains('th-day')) {
+
+        if (activeColumnLine) {
+            activeColumnLine.style.opacity = '0';
+        }
+        target.classList.remove('column-hover');
+    }
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', () => {
+    initColumnHover();
+});
