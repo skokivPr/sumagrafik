@@ -1874,8 +1874,283 @@ function hideColumnLine(e) {
 // Initialize additional features on page load
 document.addEventListener('DOMContentLoaded', () => {
     initColumnHover();
+    createColorSettingsModal(); // Create modal dynamically
     initColorSettings(); // Initialize color settings modal
 });
+
+// Create Color Settings Modal dynamically
+function createColorSettingsModal() {
+    const modalHTML = `
+    <!-- Color Settings Modal -->
+    <div id="color-settings-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-cog"></i> Ustawienia Grup Pracowników</h2>
+                <button class="modal-close" id="close-color-modal"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-tabs">
+                <button class="modal-tab active" data-tab="colors"><i class="fas fa-palette"></i> Kolory</button>
+                <button class="modal-tab" data-tab="ranges"><i class="fas fa-list-ol"></i> Zakresy</button>
+            </div>
+            <div class="modal-body">
+                <!-- Colors Tab -->
+                <div class="modal-tab-content active" data-content="colors">
+                    <p class="modal-description">Dostosuj kolory dla różnych grup pracowników w tabeli harmonogramu.</p>
+
+                    <div class="color-groups">
+                        <!-- Yard Workers (Y) -->
+                        <div class="color-group-item">
+                            <div class="color-group-header">
+                                <span class="color-group-badge yard-badge">Y</span>
+                                <span class="color-group-label">Yard Workers</span>
+                            </div>
+                            <div class="color-inputs">
+                                <div class="color-input-wrapper">
+                                    <label>Jasny motyw:</label>
+                                    <input type="color" id="color-Y-light" class="color-picker" data-group="Y"
+                                        data-type="light">
+                                </div>
+                                <div class="color-input-wrapper">
+                                    <label>Ciemny motyw:</label>
+                                    <input type="color" id="color-Y-dark" class="color-picker" data-group="Y"
+                                        data-type="dark">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- M Workers -->
+                        <div class="color-group-item">
+                            <div class="color-group-header">
+                                <span class="color-group-badge m-badge">M</span>
+                                <span class="color-group-label">M Workers</span>
+                            </div>
+                            <div class="color-inputs">
+                                <div class="color-input-wrapper">
+                                    <label>Jasny motyw:</label>
+                                    <input type="color" id="color-M-light" class="color-picker" data-group="M"
+                                        data-type="light">
+                                </div>
+                                <div class="color-input-wrapper">
+                                    <label>Ciemny motyw:</label>
+                                    <input type="color" id="color-M-dark" class="color-picker" data-group="M"
+                                        data-type="dark">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- K Workers -->
+                        <div class="color-group-item">
+                            <div class="color-group-header">
+                                <span class="color-group-badge k-badge">K</span>
+                                <span class="color-group-label">K Workers</span>
+                            </div>
+                            <div class="color-inputs">
+                                <div class="color-input-wrapper">
+                                    <label>Jasny motyw:</label>
+                                    <input type="color" id="color-K-light" class="color-picker" data-group="K"
+                                        data-type="light">
+                                </div>
+                                <div class="color-input-wrapper">
+                                    <label>Ciemny motyw:</label>
+                                    <input type="color" id="color-K-dark" class="color-picker" data-group="K"
+                                        data-type="dark">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- L Workers -->
+                        <div class="color-group-item">
+                            <div class="color-group-header">
+                                <span class="color-group-badge light-blue-badge">L</span>
+                                <span class="color-group-label">L Workers</span>
+                            </div>
+                            <div class="color-inputs">
+                                <div class="color-input-wrapper">
+                                    <label>Jasny motyw:</label>
+                                    <input type="color" id="color-L-light" class="color-picker" data-group="L"
+                                        data-type="light">
+                                </div>
+                                <div class="color-input-wrapper">
+                                    <label>Ciemny motyw:</label>
+                                    <input type="color" id="color-L-dark" class="color-picker" data-group="L"
+                                        data-type="dark">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- S Workers -->
+                        <div class="color-group-item">
+                            <div class="color-group-header">
+                                <span class="color-group-badge sa-badge">S</span>
+                                <span class="color-group-label">S Workers</span>
+                            </div>
+                            <div class="color-inputs">
+                                <div class="color-input-wrapper">
+                                    <label>Jasny motyw:</label>
+                                    <input type="color" id="color-S-light" class="color-picker" data-group="S"
+                                        data-type="light">
+                                </div>
+                                <div class="color-input-wrapper">
+                                    <label>Ciemny motyw:</label>
+                                    <input type="color" id="color-S-dark" class="color-picker" data-group="S"
+                                        data-type="dark">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- D Workers -->
+                        <div class="color-group-item">
+                            <div class="color-group-header">
+                                <span class="color-group-badge priority-badge">D</span>
+                                <span class="color-group-label">D Workers (Priority)</span>
+                            </div>
+                            <div class="color-inputs">
+                                <div class="color-input-wrapper">
+                                    <label>Jasny motyw:</label>
+                                    <input type="color" id="color-D-light" class="color-picker" data-group="D"
+                                        data-type="light">
+                                </div>
+                                <div class="color-input-wrapper">
+                                    <label>Ciemny motyw:</label>
+                                    <input type="color" id="color-D-dark" class="color-picker" data-group="D"
+                                        data-type="dark">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ranges Tab -->
+                <div class="modal-tab-content" data-content="ranges">
+                    <p class="modal-description">Określ zakresy wierszy dla każdej grupy pracowników (numery wierszy
+                        liczone od 1).</p>
+
+                    <div class="ranges-groups">
+                        <!-- D Workers -->
+                        <div class="range-group-item">
+                            <div class="range-group-header">
+                                <span class="priority-badge">D</span>
+                                <span class="range-group-label">D - Priority Workers</span>
+                            </div>
+                            <div class="range-inputs">
+                                <div class="range-input-wrapper">
+                                    <label>Od wiersza:</label>
+                                    <input type="number" id="range-D-from" class="range-input" min="1" value="1">
+                                </div>
+                                <div class="range-input-wrapper">
+                                    <label>Do wiersza:</label>
+                                    <input type="number" id="range-D-to" class="range-input" min="1" value="5">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- S Workers -->
+                        <div class="range-group-item">
+                            <div class="range-group-header">
+                                <span class="sa-badge">S</span>
+                                <span class="range-group-label">S - SA Workers</span>
+                            </div>
+                            <div class="range-inputs">
+                                <div class="range-input-wrapper">
+                                    <label>Od wiersza:</label>
+                                    <input type="number" id="range-S-from" class="range-input" min="1" value="6">
+                                </div>
+                                <div class="range-input-wrapper">
+                                    <label>Do wiersza:</label>
+                                    <input type="number" id="range-S-to" class="range-input" min="1" value="10">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- L Workers -->
+                        <div class="range-group-item">
+                            <div class="range-group-header">
+                                <span class="light-blue-badge">L</span>
+                                <span class="range-group-label">L - Light Blue Workers</span>
+                            </div>
+                            <div class="range-inputs">
+                                <div class="range-input-wrapper">
+                                    <label>Od wiersza:</label>
+                                    <input type="number" id="range-L-from" class="range-input" min="1" value="11">
+                                </div>
+                                <div class="range-input-wrapper">
+                                    <label>Do wiersza:</label>
+                                    <input type="number" id="range-L-to" class="range-input" min="1" value="12">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- K Workers -->
+                        <div class="range-group-item">
+                            <div class="range-group-header">
+                                <span class="k-badge">K</span>
+                                <span class="range-group-label">K - K Workers</span>
+                            </div>
+                            <div class="range-inputs">
+                                <div class="range-input-wrapper">
+                                    <label>Od wiersza:</label>
+                                    <input type="number" id="range-K-from" class="range-input" min="1" value="13">
+                                </div>
+                                <div class="range-input-wrapper">
+                                    <label>Do wiersza:</label>
+                                    <input type="number" id="range-K-to" class="range-input" min="1" value="26">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- M Workers -->
+                        <div class="range-group-item">
+                            <div class="range-group-header">
+                                <span class="m-badge">M</span>
+                                <span class="range-group-label">M - M Workers</span>
+                            </div>
+                            <div class="range-inputs">
+                                <div class="range-input-wrapper">
+                                    <label>Ilość wierszy:</label>
+                                    <input type="number" id="range-M-count" class="range-input" min="1" value="12">
+                                    <small class="range-hint">Przed grupą Y (od końca)</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Y Workers -->
+                        <div class="range-group-item">
+                            <div class="range-group-header">
+                                <span class="yard-badge">Y</span>
+                                <span class="range-group-label">Y - Yard Workers</span>
+                            </div>
+                            <div class="range-inputs">
+                                <div class="range-input-wrapper">
+                                    <label>Ilość ostatnich wierszy:</label>
+                                    <input type="number" id="range-Y-count" class="range-input" min="1" value="22">
+                                    <small class="range-hint">Liczba wierszy od końca tabeli</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="ranges-note">
+                        <i class="fas fa-info-circle"></i>
+                        <span><strong>Uwaga:</strong> Grupy M i Y używają liczby wierszy od końca tabeli. Pozostałe
+                            grupy używają konkretnych zakresów (od-do).</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-modal-reset" id="reset-colors-btn">
+                    <i class="fas fa-undo"></i> Przywróć domyślne
+                </button>
+                <button class="btn-modal-primary" id="save-colors-btn">
+                    <i class="fas fa-save"></i> Zapisz
+                </button>
+            </div>
+        </div>
+    </div>
+    `;
+
+    // Insert modal into document body
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+}
 
 // Color Settings Modal Functions
 function initColorSettings() {
