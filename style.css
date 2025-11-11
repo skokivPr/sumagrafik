@@ -1314,49 +1314,25 @@ thead {
     background: rgba(var(--weekend-sunday-header-bg), 0.25);
 }
 
-/* Weekend columns - Saturday */
-.table-row .td-shift:nth-child(6),
-.table-row .td-shift:nth-child(13),
-.table-row .td-shift:nth-child(20),
-.table-row .td-shift:nth-child(27),
-.compare-row .compare-td-shift:nth-child(6),
-.compare-row .compare-td-shift:nth-child(13),
-.compare-row .compare-td-shift:nth-child(20),
-.compare-row .compare-td-shift:nth-child(27) {
+/* Weekend cells - Saturday (dynamic) */
+.td-shift.weekend-saturday,
+.compare-td-shift.weekend-saturday {
     background: rgba(var(--weekend-saturday-bg), 0.12) !important;
 }
 
-/* Weekend columns - Sunday */
-.table-row .td-shift:nth-child(7),
-.table-row .td-shift:nth-child(14),
-.table-row .td-shift:nth-child(21),
-.table-row .td-shift:nth-child(28),
-.compare-row .compare-td-shift:nth-child(7),
-.compare-row .compare-td-shift:nth-child(14),
-.compare-row .compare-td-shift:nth-child(21),
-.compare-row .compare-td-shift:nth-child(28) {
+/* Weekend cells - Sunday (dynamic) */
+.td-shift.weekend-sunday,
+.compare-td-shift.weekend-sunday {
     background: rgba(var(--weekend-sunday-bg), 0.12) !important;
 }
 
-:root[theme="dark"] .table-row .td-shift:nth-child(6),
-:root[theme="dark"] .table-row .td-shift:nth-child(13),
-:root[theme="dark"] .table-row .td-shift:nth-child(20),
-:root[theme="dark"] .table-row .td-shift:nth-child(27),
-:root[theme="dark"] .compare-row .compare-td-shift:nth-child(6),
-:root[theme="dark"] .compare-row .compare-td-shift:nth-child(13),
-:root[theme="dark"] .compare-row .compare-td-shift:nth-child(20),
-:root[theme="dark"] .compare-row .compare-td-shift:nth-child(27) {
+:root[theme="dark"] .td-shift.weekend-saturday,
+:root[theme="dark"] .compare-td-shift.weekend-saturday {
     background: rgba(var(--weekend-saturday-bg), 0.18) !important;
 }
 
-:root[theme="dark"] .table-row .td-shift:nth-child(7),
-:root[theme="dark"] .table-row .td-shift:nth-child(14),
-:root[theme="dark"] .table-row .td-shift:nth-child(21),
-:root[theme="dark"] .table-row .td-shift:nth-child(28),
-:root[theme="dark"] .compare-row .compare-td-shift:nth-child(7),
-:root[theme="dark"] .compare-row .compare-td-shift:nth-child(14),
-:root[theme="dark"] .compare-row .compare-td-shift:nth-child(21),
-:root[theme="dark"] .compare-row .compare-td-shift:nth-child(28) {
+:root[theme="dark"] .td-shift.weekend-sunday,
+:root[theme="dark"] .compare-td-shift.weekend-sunday {
     background: rgba(var(--weekend-sunday-bg), 0.18) !important;
 }
 
