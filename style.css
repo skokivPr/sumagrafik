@@ -701,17 +701,14 @@ body.theme-transitioning * {
 }
 
 .employee-tag {
-    background: rgb(var(--employee-tag-bg));
     border: 1px solid rgba(var(--employee-tag-border), 0.2);
     padding: 0.2rem 0.5rem;
-    display: flex;
     contain: layout style;
-    font-weight: 500;
+    font-weight: bold;
     color: var(--text-color);
     backdrop-filter: blur(5px);
-    font-size: 0.8125rem;
+    font-size: 0.8rem;
     width: 150px;
-    justify-content: space-between;
     align-items: center;
     transition: all 0.2s ease;
 }
@@ -2649,4 +2646,5 @@ thead {
         font-size: 0.75rem;
         padding: 0.625rem 0.5rem;
     }
+
 }
