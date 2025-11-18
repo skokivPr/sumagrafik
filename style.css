@@ -701,7 +701,7 @@ body.theme-transitioning * {
 }
 
 .employee-tag {
-        border: 1px solid rgba(var(--employee-tag-border), 0.2);
+    border: 1px solid rgba(var(--employee-tag-border), 0.2);
     padding: 0.2rem 0.5rem;
     contain: layout style;
     font-weight: bold;
@@ -2625,3 +2625,5 @@ thead {
     }
 }
 
+
+}
