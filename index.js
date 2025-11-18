@@ -520,7 +520,7 @@ const renderFullTable = (filter = '') => {
 
         // Build shift cells using map for better performance
         // Only show cells for the current month
-        const shiftCells = employee.schedule.slice(0, state.daysInMonth).map(shift => {
+        const shiftCells = employee.schedule.slice(0, state.daysInMonth).map((shift, dayIndex) => {
             const category = getShiftCategory(shift);
             let bgColor = '';
             if (category === '1') bgColor = 'shift-1';
@@ -531,7 +531,13 @@ const renderFullTable = (filter = '') => {
             else if (category === 'Off') bgColor = 'shift-off';
             else if (category === 'Other') bgColor = 'shift-other';
 
-            return `<td class="td-shift ${bgColor}">${shift || ''}</td>`;
+            // Add weekend classes
+            const dayOfWeek = (state.firstDayOfMonth + dayIndex) % 7;
+            const isSaturday = dayOfWeek === 5;
+            const isSunday = dayOfWeek === 6;
+            const weekendClass = isSaturday ? ' weekend-saturday' : (isSunday ? ' weekend-sunday' : '');
+
+            return `<td class="td-shift ${bgColor}${weekendClass}">${shift || ''}</td>`;
         }).join('');
 
         return `<tr class="${rowClass}" data-employee="${employee.name}">
@@ -1372,7 +1378,7 @@ const showCompareView = () => {
         </td>`;
 
         // Only show shifts for the current month
-        employee.schedule.slice(0, state.daysInMonth).forEach(shift => {
+        employee.schedule.slice(0, state.daysInMonth).forEach((shift, dayIndex) => {
             const category = getShiftCategory(shift);
             let bgColor = '';
             if (category === '1') bgColor = 'shift-1';
@@ -1383,7 +1389,13 @@ const showCompareView = () => {
             else if (category === 'Off') bgColor = 'shift-off';
             else if (category === 'Other') bgColor = 'shift-other';
 
-            html += `<td class="compare-td-shift ${bgColor}">${shift || ''}</td>`;
+            // Add weekend classes
+            const dayOfWeek = (state.firstDayOfMonth + dayIndex) % 7;
+            const isSaturday = dayOfWeek === 5;
+            const isSunday = dayOfWeek === 6;
+            const weekendClass = isSaturday ? ' weekend-saturday' : (isSunday ? ' weekend-sunday' : '');
+
+            html += `<td class="compare-td-shift ${bgColor}${weekendClass}">${shift || ''}</td>`;
         });
         html += '</tr>';
     });
