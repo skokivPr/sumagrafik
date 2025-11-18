@@ -710,8 +710,7 @@ body.theme-transitioning * {
     font-size: 0.8rem;
     width: 150px;
     align-items: center;
-    transition: all 0.2s 
-ease;
+    transition: all 0.2s ease;
 }
 
 .employee-tag:hover {
@@ -2627,3 +2626,4 @@ thead {
 
 
 }
+
